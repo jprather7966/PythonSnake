@@ -5,10 +5,11 @@ import pygame
 BLOCK_Size = 20
 SNAKE_Color = (0, 255, 0)
 APPLE_Color = (255, 0, 0)
+GAME_SIZE = 600
 
 pygame.init()
 clock = pygame.time.Clock()
-game_display = pygame.display.set_mode((600, 600))
+game_display = pygame.display.set_mode((GAME_SIZE, GAME_SIZE))
 pygame.display.set_caption('SNAKE!')
 
 
@@ -37,6 +38,11 @@ class Snake():
         self.body.insert(0,(head_xcor,head_ycor))
 
         self.body.pop()
+    def has_collided_with_wall(self):
+        head = self.body[0]
+        if head[0] < 0 or head[1] < 0 or head[0] > GAME_SIZE or head[1] > GAME_SIZE:
+            return True
+        return False    
 
 class Apple():
     def __init__(self):
@@ -68,6 +74,8 @@ while snake.is_alive:
     game_display.blit(game_display, (0, 0))
 
     snake.move()
+    if snake.has_collided_with_wall():
+        snake.is_alive = False
 
     game_display.fill((0, 0, 0))
     snake.show()
