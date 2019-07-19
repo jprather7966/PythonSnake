@@ -1,11 +1,13 @@
 # Ctrl + Shift + P, then select interpreter
 #Choose an interpreter that works
 import pygame
+import random 
 
-BLOCK_Size = 20
+
+GAME_SIZE = 600 
+BLOCK_SIZE = GAME_SIZE / 40
 SNAKE_Color = (0, 255, 0)
 APPLE_Color = (255, 0, 0)
-GAME_SIZE = 600
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -18,40 +20,40 @@ class Snake():
         self.is_alive = True
         self.direction = "RIGHT"
         self.body = [(xcor, ycor),
-                     (xcor - BLOCK_Size, ycor),
-                     (xcor - BLOCK_Size * 2, ycor)]
+                     (xcor - BLOCK_SIZE, ycor),
+                     (xcor - BLOCK_SIZE * 2, ycor)]
     def show(self):
         for body_part in self.body:
-            pygame.draw.rect(game_display, SNAKE_Color, pygame.Rect(body_part[0], body_part[1], BLOCK_Size, BLOCK_Size))
+            pygame.draw.rect(game_display, SNAKE_Color, pygame.Rect(body_part[0], body_part[1], BLOCK_SIZE, BLOCK_SIZE))
     def move(self):
         head_xcor = self.body[0][0]
         head_ycor = self.body[0][1]
         if self.direction == "RIGHT":
-            head_xcor = head_xcor + BLOCK_Size
+            head_xcor = head_xcor + BLOCK_SIZE
         elif self.direction == "LEFT":
-            head_xcor = head_xcor - BLOCK_Size
+            head_xcor = head_xcor - BLOCK_SIZE
         elif self.direction == "UP":
-            head_ycor = head_ycor - BLOCK_Size
+            head_ycor = head_ycor - BLOCK_SIZE
         elif self.direction == "DOWN":
-            head_ycor = head_ycor + BLOCK_Size
+            head_ycor = head_ycor + BLOCK_SIZE
             
         self.body.insert(0,(head_xcor,head_ycor))
 
         self.body.pop()
     def has_collided_with_wall(self):
         head = self.body[0]
-        if head[0] < 0 or head[1] < 0 or head[0] > GAME_SIZE or head[1] > GAME_SIZE:
+        if head[0] < 0 or head[1] < 0 or head[0] + BLOCK_SIZE > GAME_SIZE or head[1] + BLOCK_SIZE > GAME_SIZE:
             return True
         return False    
 
 class Apple():
     def __init__(self):
-        self.xcor = 30
+        self.xcor = random.randrange(0, GAME_SIZE / BLOCK_SIZE) * BLOCK_SIZE
         self.ycor = 80
     def show(self):
-        pygame.draw.rect(game_display, APPLE_Color, pygame.Rect(self.xcor, self.ycor, BLOCK_Size, BLOCK_Size))
+        pygame.draw.rect(game_display, APPLE_Color, pygame.Rect(self.xcor, self.ycor, BLOCK_SIZE, BLOCK_SIZE))
 
-snake = Snake(145, 200)
+snake = Snake(BLOCK_SIZE * 5, BLOCK_SIZE * 5)
 apple = Apple()
 
 # Main Game Loop
