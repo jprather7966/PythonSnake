@@ -6,11 +6,12 @@ import random
 #Game Settings
 GAME_SIZE = 600 
 BLOCK_SIZE = GAME_SIZE / 40
-SNAKE_Color = (0, 255, 0)
+SNAKE_COLOR = (0, 255, 0)
 APPLE_Color = (255, 0, 0)
 BACKGROUND_COLOR = (0,0,0)
 
 pygame.init()
+SCORE_FONT = pygame.font.SysFont('Arial', int(GAME_SIZE * 0.065) , True)
 clock = pygame.time.Clock()
 game_display = pygame.display.set_mode((GAME_SIZE, GAME_SIZE))
 pygame.display.set_caption('SNAKE!')
@@ -25,16 +26,17 @@ class Game_Object():
 class Snake():
     def __init__(self, xcor, ycor):
         self.is_alive = True
+        self.score = 0
         self.direction = "RIGHT"
-        self.body = [(xcor, ycor),
-                     (xcor - BLOCK_SIZE, ycor),
-                     (xcor - BLOCK_SIZE * 2, ycor)]
+        self.body = [Game_Object(xcor, ycor,SNAKE_COLOR),
+                     Game_Object(xcor - BLOCK_SIZE, ycor,SNAKE_COLOR),
+                     Game_Object(xcor - BLOCK_SIZE * 2, ycor,SNAKE_COLOR)]
     def show(self):
         for body_part in self.body:
-            pygame.draw.rect(game_display, SNAKE_Color, pygame.Rect(body_part[0], body_part[1], BLOCK_SIZE, BLOCK_SIZE))
+            body_part.show()
     def move(self):
-        head_xcor = self.body[0][0]
-        head_ycor = self.body[0][1]
+        head_xcor = self.body[0].xcor
+        head_ycor = self.body[0].ycor
         if self.direction == "RIGHT":
             head_xcor = head_xcor + BLOCK_SIZE
         elif self.direction == "LEFT":
@@ -43,19 +45,20 @@ class Snake():
             head_ycor = head_ycor - BLOCK_SIZE
         elif self.direction == "DOWN":
             head_ycor = head_ycor + BLOCK_SIZE
-            
-        self.body.insert(0,(head_xcor,head_ycor))
-
+        
+        new_snake_head = Game_Object(head_xcor,head_ycor,SNAKE_COLOR)
+        self.body.insert(0,new_snake_head)
         self.body.pop()
+
     def has_collided_with_wall(self):
         head = self.body[0]
-        if head[0] < 0 or head[1] < 0 or head[0] + BLOCK_SIZE > GAME_SIZE or head[1] + BLOCK_SIZE > GAME_SIZE:
+        if head.xcor < 0 or head.ycor < 0 or head.xcor + BLOCK_SIZE > GAME_SIZE or head.ycor + BLOCK_SIZE > GAME_SIZE:
             return True
         return False
     def has_eaten_apple(self, apple_object):
         head = self.body[0]
-        if head[0] == apple_object.body.xcor and head[1] == apple_object.body.ycor:
-            return True
+        if head.xcor == apple_object.body.xcor and head.ycor == apple_object.body.ycor:
+             return True 
         return False    
 
 class Apple():
@@ -95,11 +98,15 @@ while snake.is_alive:
     if snake.has_collided_with_wall():
         snake.is_alive = False
     if snake.has_eaten_apple(apple):
+        snake.score += 1
         apple = Apple()
 
     game_display.fill(BACKGROUND_COLOR)
     snake.show()
     apple.show()
+
+    score_text = SCORE_FONT.render(str(snake.score),False, (255,255,255))
+    game_display.blit(score_text,(0,0))
 
     pygame.display.flip()
     clock.tick(12)
