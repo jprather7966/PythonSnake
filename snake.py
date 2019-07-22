@@ -3,7 +3,7 @@
 import pygame
 import random 
 
-
+#Game Settings
 GAME_SIZE = 600 
 BLOCK_SIZE = GAME_SIZE / 40
 SNAKE_Color = (0, 255, 0)
@@ -44,12 +44,17 @@ class Snake():
         head = self.body[0]
         if head[0] < 0 or head[1] < 0 or head[0] + BLOCK_SIZE > GAME_SIZE or head[1] + BLOCK_SIZE > GAME_SIZE:
             return True
+        return False
+    def has_eaten_apple(self, apple_object):
+        head = self.body[0]
+        if head[0] == apple_object.xcor and head[1] == apple_object.ycor:
+            return True
         return False    
 
 class Apple():
     def __init__(self):
         self.xcor = random.randrange(0, GAME_SIZE / BLOCK_SIZE) * BLOCK_SIZE
-        self.ycor = 80
+        self.ycor = random.randrange(0, GAME_SIZE / BLOCK_SIZE) * BLOCK_SIZE
     def show(self):
         pygame.draw.rect(game_display, APPLE_Color, pygame.Rect(self.xcor, self.ycor, BLOCK_SIZE, BLOCK_SIZE))
 
@@ -78,6 +83,8 @@ while snake.is_alive:
     snake.move()
     if snake.has_collided_with_wall():
         snake.is_alive = False
+    if snake.has_eaten_apple(apple):
+        apple = Apple()
 
     game_display.fill((0, 0, 0))
     snake.show()
