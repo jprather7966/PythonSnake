@@ -58,6 +58,13 @@ class Snake():
         if head.xcor < 0 or head.ycor < 0 or head.xcor + BLOCK_SIZE > GAME_SIZE or head.ycor + BLOCK_SIZE > GAME_SIZE:
             return True
         return False
+    def has_collided_with_self(self):
+        head = self.body[0]
+        for i in range(1, len(self.body)):
+            if head.xcor == self.body[i].xcor and head.ycor == self.body[i].ycor:
+                return True
+        return False
+            
     def has_eaten_apple(self, apple_object):
         head = self.body[0]
         if head.xcor == apple_object.body.xcor and head.ycor == apple_object.body.ycor:
@@ -98,7 +105,7 @@ while snake.is_alive:
     game_display.blit(game_display, (0, 0))
 
     snake.move()
-    if snake.has_collided_with_wall():
+    if snake.has_collided_with_wall() or snake.has_collided_with_self():
         snake.is_alive = False
     if snake.has_eaten_apple(apple):
         snake.score += 1
