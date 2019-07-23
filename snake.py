@@ -20,8 +20,11 @@ class Game_Object():
         self.xcor = xcor
         self.ycor = ycor
         self.color = color
-    def show(self):
+    def show_as_circle(self):
+        pygame.draw.circle(game_display, self.color, (int (self.xcor + BLOCK_SIZE/2) , int(self.ycor + BLOCK_SIZE/2)), int (BLOCK_SIZE / 2))
+    def show_as_square(self):
         pygame.draw.rect(game_display, self.color, pygame.Rect(self.xcor, self.ycor, BLOCK_SIZE, BLOCK_SIZE))
+
 
 class Snake():
     def __init__(self, xcor, ycor):
@@ -32,11 +35,30 @@ class Snake():
                      Game_Object(xcor - BLOCK_SIZE, ycor,SNAKE_COLOR),
                      Game_Object(xcor - BLOCK_SIZE * 2, ycor,SNAKE_COLOR)]
         self.previous_last_tail = self.body[len(self.body) - 1]
+
     def grow(self):
         self.body.append(self.previous_last_tail)
+
     def show(self):
         for body_part in self.body:
-            body_part.show()
+            body_part.show_as_square()
+
+    def set_direction_right(self):
+        if self.direction != "LEFT":
+            self.direction = "RIGHT"
+
+    def set_direction_left(self):
+        if self.direction != "RIGHT":
+            self.direction = "LEFT"
+
+    def set_direction_up(self):
+        if self.direction != "DOWN":
+            self.direction = "UP"
+
+    def set_direction_down(self):
+        if self.direction != "UP":
+            self.direction = "DOWN"
+
     def move(self):
         head_xcor = self.body[0].xcor
         head_ycor = self.body[0].ycor
@@ -72,12 +94,24 @@ class Snake():
         return False    
 
 class Apple():
-    def __init__(self):
+    def __init__(self, snake_body):
+        self.body = self.get_rnd_game_object()
+        
+
+        while self.apple_is_on_snake(snake_body):
+            self.body = self.get_rnd_game_object()
+        
+    def get_rnd_game_object(self):
         xcor = random.randrange(0, GAME_SIZE / BLOCK_SIZE) * BLOCK_SIZE
         ycor = random.randrange(0, GAME_SIZE / BLOCK_SIZE) * BLOCK_SIZE
-        self.body = Game_Object(xcor, ycor , APPLE_Color)
+        return Game_Object(xcor, ycor, APPLE_Color)
+    def apple_is_on_snake(self,snake_body):
+        for snake_part in snake.body:
+            if snake_part.xcor == self.body.xcor and snake_part.ycor == self.body.ycor:
+                return True
+        return False
     def show(self):
-        self.body.show()
+        self.body.show_as_circle()
 
 
 def handle_events():
@@ -87,16 +121,16 @@ def handle_events():
             snake.is_alive = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                snake.direction = "LEFT"
+                snake.set_direction_left()
             elif event.key == pygame.K_RIGHT:
-                snake.direction = "RIGHT"
+                snake.set_direction_right()
             elif event.key == pygame.K_UP:
-                snake.direction = "UP"
+                snake.set_direction_up()
             elif event.key == pygame.K_DOWN:
-                snake.direction = "DOWN"
+                snake.set_direction_down()
 
 snake = Snake(BLOCK_SIZE * 5, BLOCK_SIZE * 5)
-apple = Apple()
+apple = Apple(snake.body)
 
 # Main Game Loop
 while snake.is_alive:
@@ -110,7 +144,7 @@ while snake.is_alive:
     if snake.has_eaten_apple(apple):
         snake.score += 1
         snake.grow()
-        apple = Apple()
+        apple = Apple(snake.body)
 
     game_display.fill(BACKGROUND_COLOR)
     snake.show()
