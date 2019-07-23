@@ -4,12 +4,13 @@ import pygame
 import random 
 
 #Game Settings
-GAME_SIZE = 600 
+GAME_SIZE = 600
 BLOCK_SIZE = GAME_SIZE / 40
 SNAKE_COLOR = (0, 255, 0)
-APPLE_Color = (255, 0, 0)
+APPLE_COLOR = (255, 0, 0)
 BACKGROUND_COLOR = (0,0,0)
-FRAMES_PER_SECOND = 30
+FRAMES_PER_SECOND = 10
+GAP_SIZE = GAME_SIZE * .002
 
 pygame.init()
 SCORE_FONT = pygame.font.SysFont('Arial', int(GAME_SIZE * 0.065) , True)
@@ -25,7 +26,7 @@ class Game_Object():
     def show_as_circle(self):
         pygame.draw.circle(game_display, self.color, (int (self.xcor + BLOCK_SIZE/2) , int(self.ycor + BLOCK_SIZE/2)), int (BLOCK_SIZE / 2))
     def show_as_square(self):
-        pygame.draw.rect(game_display, self.color, pygame.Rect(self.xcor, self.ycor, BLOCK_SIZE, BLOCK_SIZE))
+        pygame.draw.rect(game_display, self.color, pygame.Rect(self.xcor + GAP_SIZE, self.ycor + GAP_SIZE, BLOCK_SIZE - GAP_SIZE * 2, BLOCK_SIZE - GAP_SIZE * 2))
 
 
 class Snake():
@@ -106,7 +107,7 @@ class Apple():
     def get_rnd_game_object(self):
         xcor = random.randrange(0, GAME_SIZE / BLOCK_SIZE) * BLOCK_SIZE
         ycor = random.randrange(0, GAME_SIZE / BLOCK_SIZE) * BLOCK_SIZE
-        return Game_Object(xcor, ycor, APPLE_Color)
+        return Game_Object(xcor, ycor, APPLE_COLOR)
     def apple_is_on_snake(self,snake_body):
         for snake_part in snake.body:
             if snake_part.xcor == self.body.xcor and snake_part.ycor == self.body.ycor:
