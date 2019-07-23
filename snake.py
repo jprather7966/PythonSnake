@@ -2,14 +2,21 @@
 #Choose an interpreter that works
 import pygame
 import random 
+#Colors
+BLUE      = (  0,   0, 255)
+PURPLE    = (255,   0, 255)
+RED       = (255,   0,   0)
+GREEN = (0,255,0)
+RANDOM_COLOR = (random.randrange(0,255), random.randrange(0,255), random.randrange(0,255))
 
+NEARBLACK = ( 15,  15,  40)
 #Game Settings
 GAME_SIZE = 600
 BLOCK_SIZE = GAME_SIZE / 40
-SNAKE_COLOR = (0, 255, 0)
+
 APPLE_COLOR = (255, 0, 0)
-BACKGROUND_COLOR = (0,0,0)
-FRAMES_PER_SECOND = 10
+BACKGROUND_COLOR = NEARBLACK
+FRAMES_PER_SECOND = 60
 GAP_SIZE = GAME_SIZE * .002
 
 pygame.init()
@@ -34,10 +41,11 @@ class Snake():
         self.is_alive = True
         self.score = 0
         self.direction = "RIGHT"
-        self.body = [Game_Object(xcor, ycor,SNAKE_COLOR),
-                     Game_Object(xcor - BLOCK_SIZE, ycor,SNAKE_COLOR),
-                     Game_Object(xcor - BLOCK_SIZE * 2, ycor,SNAKE_COLOR)]
+        self.body = [Game_Object(xcor, ycor,GREEN),
+                     Game_Object(xcor - BLOCK_SIZE, ycor,BLUE),
+                     Game_Object(xcor - BLOCK_SIZE * 2, ycor,RED)]
         self.previous_last_tail = self.body[len(self.body) - 1]
+        self.color_counter = 0
 
     def grow(self):
         self.body.append(self.previous_last_tail)
@@ -74,9 +82,26 @@ class Snake():
         elif self.direction == "DOWN":
             head_ycor = head_ycor + BLOCK_SIZE
         
-        new_snake_head = Game_Object(head_xcor,head_ycor,SNAKE_COLOR)
+        new_color = BLUE
+        if self.color_counter == 0:
+            new_color = RANDOM_COLOR
+        elif self.color_counter == 1:
+            new_color = GREEN
+        elif self.color_counter == 2:
+            new_color = RED
+        elif self.color_counter == 3:
+            new_color = PURPLE
+        
+        if self.color_counter == 3:
+            self.color_counter = 0
+        else:
+            self.color_counter += 1
+        new_snake_head = Game_Object(head_xcor,head_ycor,new_color)
         self.body.insert(0,new_snake_head)
         self.previous_last_tail = self.body.pop()
+    def cycle_colors(self):
+        for i in range(len(self.body) - 1, -1 ,-1):
+            self.body[i].color = self.body[i-1].color
 
     def has_collided_with_wall(self):
         head = self.body[0]
@@ -99,8 +124,6 @@ class Snake():
 class Apple():
     def __init__(self, snake_body):
         self.body = self.get_rnd_game_object()
-        
-
         while self.apple_is_on_snake(snake_body):
             self.body = self.get_rnd_game_object()
         
@@ -162,22 +185,26 @@ while show_title_screen:
     pygame.display.flip()
     clock.tick(FRAMES_PER_SECOND)
 # Main Game Loop
+frame_counter = 0
+
 while snake.is_alive:
 
     handle_events()
     game_display.blit(game_display, (0, 0))
-
-    snake.move()
-    if snake.has_collided_with_wall() or snake.has_collided_with_self():
-        snake.is_alive = False
-    if snake.has_eaten_apple(apple):
-        snake.score += 1
-        snake.grow()
-        apple = Apple(snake.body)
+    if frame_counter % 2 == 0:
+        snake.move()
+        if snake.has_collided_with_wall() or snake.has_collided_with_self():
+            snake.is_alive = False
+        if snake.has_eaten_apple(apple):
+            snake.score += 1
+            snake.grow()
+            apple = Apple(snake.body)
 
     game_display.fill(BACKGROUND_COLOR)
     snake.show()
     apple.show()
+    frame_counter += 1
+    snake.cycle_colors()
 
     score_text = SCORE_FONT.render(str(snake.score),False, (255,255,255))
     game_display.blit(score_text,(0,0))
